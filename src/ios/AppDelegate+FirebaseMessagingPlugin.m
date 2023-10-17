@@ -88,7 +88,8 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
 didReceiveNotificationResponse:(UNNotificationResponse *)response
          withCompletionHandler:(void (^)(void))completionHandler {
-    NSDictionary *userInfo = response.notification.request.content.userInfo;
+    NSMutableDictionary *userInfo = [response.notification.request.content.userInfo mutableCopy];
+    userInfo[@"tapped"] = @YES;
     FirebaseMessagingPlugin* fcmPlugin = [self getPluginInstance];
 
     [fcmPlugin sendBackgroundNotification:userInfo];

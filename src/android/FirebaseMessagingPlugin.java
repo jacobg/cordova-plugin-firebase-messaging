@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -171,6 +172,39 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
         }
     }
 
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+        String sRequestId = String.valueOf(requestCode);
+        try {
+            if (requestPermissionCallback == null) {
+                Log.e(TAG, "No callback context found for permissions request id=" + sRequestId);
+                return;
+            }
+
+            boolean postNotificationPermissionGranted = false;
+            for (int i = 0, len = permissions.length; i < len; i++) {
+                String androidPermission = permissions[i];
+
+                if (androidPermission.equals(Manifest.permission.POST_NOTIFICATIONS)){
+                    postNotificationPermissionGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                }
+            }
+
+            if (postNotificationPermissionGranted) {
+                requestPermissionCallback.success();
+            } else {
+                requestPermissionCallback.error("Notifications permission is not granted");
+            }
+            requestPermissionCallback = null;
+
+        } catch (Exception e ) {
+            if (requestPermissionCallback != null) {
+                requestPermissionCallback.error(e.toString());
+            } else {
+                Log.e(TAG, "onRequestPermissionResult", e);
+            }
+        }
+    }
+
     @Override
     public void onNewIntent(Intent intent) {
         JSONObject notificationData = getNotificationData(intent);
@@ -248,6 +282,7 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
             for (String key : keys) {
                 notificationData.put(key, bundle.get(key));
             }
+            notificationData.put("tapped", true);
             return notificationData;
         } catch (JSONException e) {
             Log.e(TAG, "getNotificationData", e);

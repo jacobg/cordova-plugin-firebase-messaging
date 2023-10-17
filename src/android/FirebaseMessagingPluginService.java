@@ -59,7 +59,7 @@ public class FirebaseMessagingPluginService extends FirebaseMessagingService {
             NotificationChannel defaultChannel = notificationManager.getNotificationChannel(defaultNotificationChannel);
             if (defaultChannel == null) {
                 notificationManager.createNotificationChannel(
-                        new NotificationChannel(defaultNotificationChannel, "Firebase", NotificationManager.IMPORTANCE_HIGH));
+                        new NotificationChannel(defaultNotificationChannel, "Default", NotificationManager.IMPORTANCE_HIGH));
             }
         }
     }
